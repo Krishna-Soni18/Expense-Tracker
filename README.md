@@ -30,7 +30,7 @@ Expense Tracker is a simple desktop application that helps users record and mana
 1. Clone this repository:
 
    ```bash
-   git clone YOUR_REPOSITORY_URL
+   git clone https://github.com/Krishna-Soni18/Expense-Tracker.git
    ```
 
 2. Open the project folder.
