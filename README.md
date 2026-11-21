@@ -1,22 +1,26 @@
 
 # 💰 Expense Tracker
 
-A beginner-friendly Python GUI project to manage daily expenses using Tkinter and JSON.
+A beginner-friendly Python desktop application built using Tkinter to manage daily expenses with a simple graphical interface.
 
 ## 📌 About the Project
 
-Expense Tracker is a simple desktop application that helps users record and manage their daily expenses.
+Expense Tracker helps users record, manage, and track their daily expenses. It provides monthly expense tracking, category-wise organisation, and automatic data storage.
 
 ## ✨ Features
 
 - Add daily expenses
 - Select expense categories
-- Choose expense date
+- Choose expense dates
 - View expenses month-wise
-- Calculate total monthly expenses
+- Monthly expense dashboard
+- Category-wise expense summary
+- Edit existing expenses
 - Delete selected expenses
-- Clear all expenses
-- Save expense data using JSON
+- Clear expenses for a selected month
+- Input validation
+- Automatically save data using JSON
+- Load saved expenses when the application starts
 
 ## 🛠️ Technologies Used
 
@@ -29,36 +33,47 @@ Expense Tracker is a simple desktop application that helps users record and mana
 
 1. Clone this repository:
 
-   ```bash
-   git clone https://github.com/Krishna-Soni18/Expense-Tracker.git
-   ```
+```bash
+git clone https://github.com/Krishna-Soni18/Expense-Tracker.git
+```
 
-2. Open the project folder.
+2. Open the project folder:
 
-3. Install the required library:
+```bash
+cd Expense-Tracker
+```
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+3. Install the required packages:
+
+```bash
+pip install -r requirements.txt
+```
 
 4. Run the application:
 
-   ```bash
-   python Expense_tracker1.py
-   ```
+```bash
+python Expence_tracker1.py
+```
 
-## 📚 What I Learned
+## 📂 Project Structure
 
-- Python functions
-- Tkinter GUI development
-- Working with JSON files
-- Date and month handling
-- Basic data validation
+```text
+Expense-Tracker/
+│
+├── Expence_tracker1.py
+├── requirements.txt
+├── README.md
+└── .gitignore
+```
 
-## 👨‍💻 Author
+## 💾 Data Storage
 
-Krishna Soni
+Expense records are stored locally in a JSON file so that saved expenses can be loaded again when the application is reopened.
+
+## 🎯 Project Purpose
+
+This project was developed to practise Python programming, GUI development, file handling, JSON data storage, and basic application development.
 
 ---
 
-⭐ This is my beginner Python project. More improvements coming soon!
+**Developed by:** Krishna Soni
