@@ -7,6 +7,8 @@ A beginner-friendly Python desktop application built using Tkinter to manage dai
 
 Expense Tracker helps users record, manage, and track their daily expenses. It provides monthly expense tracking, category-wise organisation, and automatic data storage.
 
+![Expense Tracker Screenshot](Screenshot.png.png)
+
 ## ✨ Features
 
 - Add daily expenses
