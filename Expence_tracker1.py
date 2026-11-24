@@ -1,15 +1,20 @@
 import json
 import math
 import tkinter as tk
+import shutil
+import os
 from datetime import datetime
 from tkinter import messagebox, ttk
-
+from tkinter import filedialog
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 from tkcalendar import DateEntry
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 FILE_NAME = "expenses.json"
+BACKUP_FILE = "expenses_backup.json"
 DATE_FORMAT = "%d-%m-%Y"
 MAX_NAME_LENGTH = 100
 MAX_AMOUNT = 1_000_000_000
@@ -67,13 +72,34 @@ def recalculate_total():
 # ---------------------------------------------------------------------------
 # Persistence
 # ---------------------------------------------------------------------------
+def create_backup():
+    if os.path.exists(FILE_NAME):
+        shutil.copy2(FILE_NAME, BACKUP_FILE)
+
 def save_expenses():
     try:
+        create_backup()
         with open(FILE_NAME, "w") as file:
             json.dump(expenses, file)
     except OSError as error:
         messagebox.showerror("Save Error", f"Expenses could not be saved.\n{error}")
 
+def restore_backup():
+    if not os.path.exists(BACKUP_FILE):
+        messagebox.showwarning("Backup", "No backup found!")
+        return
+
+    confirm = messagebox.askyesno(
+        "Restore Backup",
+        "Are you sure you want to restore the previous data?"
+    )
+
+    if confirm:
+        shutil.copy2(BACKUP_FILE, FILE_NAME)
+        expenses.clear()
+        load_expenses()
+        show_expenses()
+        messagebox.showinfo("Backup", "Backup restored successfully!")
 
 def _parse_expense(item):
     """Return a validated (category, date, name, amount) tuple, or None."""
@@ -240,6 +266,96 @@ def add_expense():
     show_expenses()
     reset_form()
 
+def export_pdf():
+    selected_month = month_dropdown.get()
+
+    if not selected_month or selected_month == PLACEHOLDER_MONTH:
+        messagebox.showwarning("Warning", "Please choose a month first.")
+        return
+
+    month_expenses = [
+        item for item in expenses
+        if datetime.strptime(item[1], DATE_FORMAT).strftime("%B %Y") == selected_month
+    ]
+    month_expenses.sort(
+        key=lambda item: datetime.strptime(item[1], DATE_FORMAT)
+    )
+    
+    if not month_expenses:
+        messagebox.showinfo("Information", "No expenses found for this month.")
+        return
+
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".pdf",
+        filetypes=[("PDF Files", "*.pdf")],
+        initialfile=selected_month.replace(" ", "_") + "_Report.pdf"
+    )
+
+    if not file_path:
+        return
+
+    pdf = canvas.Canvas(file_path, pagesize=A4)
+    width, height = A4
+    y = height - 50
+
+    pdf.setFont("Helvetica-Bold", 18)
+    pdf.drawString(50, y, "Expense Tracker Report")
+
+    y -= 30
+    pdf.setFont("Helvetica-Bold", 13)
+    pdf.drawString(50, y, selected_month)
+
+    month_total = sum(item[3] for item in month_expenses)
+
+    y -= 35
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(50, y, f"Total Expense: Rs. {month_total:,.2f}")
+
+    category_totals = {}
+
+    for category, date, name, amount in month_expenses:
+        category_totals[category] = category_totals.get(category, 0) + amount
+
+    y -= 35
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(50, y, "Category-wise Summary")
+
+    y -= 22
+    pdf.setFont("Helvetica", 10)
+
+    for category, amount in category_totals.items():
+        pdf.drawString(60, y, f"{category}: Rs. {amount:,.2f}")
+        y -= 18
+
+    y -= 15
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(50, y, "Date-wise Expense List")
+
+    y -= 22
+    pdf.setFont("Helvetica-Bold", 9)
+    pdf.drawString(50, y, "Category")
+    pdf.drawString(160, y, "Name")
+    pdf.drawString(350, y, "Date")
+    pdf.drawString(450, y, "Amount")
+
+    y -= 18
+    pdf.setFont("Helvetica", 9)
+
+    for category, date, name, amount in month_expenses:
+        if y < 50:
+            pdf.showPage()
+            y = height - 50
+            pdf.setFont("Helvetica", 9)
+
+        pdf.drawString(50, y, category[:18])
+        pdf.drawString(160, y, name[:30])
+        pdf.drawString(350, y, date)
+        pdf.drawString(450, y, f"Rs. {amount:,.2f}")
+        y -= 18
+
+    pdf.save()
+
+    messagebox.showinfo("Success", "PDF report saved successfully!")
 
 def clear_expense():
     selected_month = month_dropdown.get()
@@ -691,7 +807,7 @@ expense_list = tk.Listbox(
     selectbackground="#059669",
     highlightthickness=1,
     highlightbackground=ENTRY_BORDER,
-    height=8,
+    height=4,
 )
 
 scrollbar = tk.Scrollbar(list_container, orient="vertical", command=expense_list.yview)
@@ -742,6 +858,36 @@ tk.Button(
     bd=0,
     cursor="hand2",
 ).pack(side="right", ipadx=10, ipady=6)
+
+tk.Button(
+    btn_frame,
+    text="Restore Backup",
+    command=restore_backup,
+    font=("Segoe UI", 10, "bold"),
+    bg="#16A34A",
+    fg="white",
+    activebackground="#15803D",
+    activeforeground="white",
+    bd=0,
+    cursor="hand2",
+).pack(side="right", ipadx=10, ipady=6, padx=5)
+
+# --- Export Monthly Report ---
+export_frame = tk.Frame(list_frame, bg=CARD_BG)
+export_frame.pack(padx=20, pady=(5, 15), fill="x")
+
+tk.Button(
+    export_frame,
+    text="Download Monthly PDF",
+    command=export_pdf,
+    font=("Segoe UI", 10, "bold"),
+    bg="#2563EB",
+    fg="white",
+    activebackground="#1D4ED8",
+    activeforeground="white",
+    bd=0,
+    cursor="hand2",
+).pack(fill="x", ipady=8)
 
 # Load existing data and populate view
 load_expenses()
