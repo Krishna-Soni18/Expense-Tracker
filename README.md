@@ -23,6 +23,10 @@ Expense Tracker helps users record, manage, and track their daily expenses. It p
 - Input validation
 - Automatically save data using JSON
 - Load saved expenses when the application starts
+- Backup and Restore expenses
+- Export monthly expense report as PDF
+- Date-wise sorted expense list
+
 
 ## 🛠️ Technologies Used
 
